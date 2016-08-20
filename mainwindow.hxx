@@ -19,8 +19,10 @@ public:
 	~MainWindow();
 
 private slots:
-	void newConnection(void);
+	void newGdbServerConnection(void);
 	void gdbsocketReadyRead(void);
+	void bmGdbPortReadyRead(void);
+	void bmDebugPortReadyRead(void);
 
 private:
 	Ui::MainWindow *ui;
