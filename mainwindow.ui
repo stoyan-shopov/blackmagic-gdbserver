@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
-    <height>415</height>
+    <width>715</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -77,6 +77,16 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>internal debug log</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="plainTextEditInternalDebugLog"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -84,7 +94,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>648</width>
+     <width>715</width>
      <height>21</height>
     </rect>
    </property>

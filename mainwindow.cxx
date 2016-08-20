@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
+#include <QRegExp>
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -35,6 +36,17 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+void MainWindow::extractGdbPacket()
+{
+QRegExp	rx("\\$(.+)#..");
+int x;
+	if ((x = rx.indexIn(gdb_incoming_stream_data)) != -1)
+	{
+		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: " + rx.cap(1)));
+		gdb_incoming_stream_data = gdb_incoming_stream_data.right(gdb_incoming_stream_data.length() - x - rx.matchedLength());
+	}
+}
+
 void MainWindow::newGdbServerConnection()
 {
 	gdbserver_socket = gdbserver.nextPendingConnection();
@@ -46,6 +58,8 @@ void MainWindow::gdbsocketReadyRead()
 QByteArray ba;
 	ui->plainTextEditGdbLog->appendPlainText(ba = gdbserver_socket->readAll());
 	bm_gdb_port.write(ba);
+	gdb_incoming_stream_data += ba;
+	extractGdbPacket();
 }
 
 void MainWindow::bmGdbPortReadyRead()

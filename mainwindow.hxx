@@ -17,6 +17,8 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
+private:
+	void extractGdbPacket(void);
 
 private slots:
 	void newGdbServerConnection(void);
@@ -31,6 +33,8 @@ private:
 	/* blackmagic usb serial ports */
 	QSerialPort	bm_gdb_port;
 	QSerialPort	bm_debug_port;
+	
+	QByteArray	gdb_incoming_stream_data;
 };
 
 #endif // MAINWINDOW_HXX
