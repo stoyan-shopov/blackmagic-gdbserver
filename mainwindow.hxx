@@ -34,7 +34,7 @@ private:
 	QSerialPort	bm_gdb_port;
 	QSerialPort	bm_debug_port;
 	
-	QByteArray	gdb_incoming_stream_data;
+	QByteArray	gdb_incoming_bytestream_data;
 };
 
 #endif // MAINWINDOW_HXX

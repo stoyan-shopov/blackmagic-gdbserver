@@ -14,8 +14,10 @@ TEMPLATE = app
 
 SOURCES +=\
         mainwindow.cxx \
-    main.cxx
+    main.cxx \
+    gdbpacket.cxx
 
-HEADERS  += mainwindow.hxx
+HEADERS  += mainwindow.hxx \
+    gdbpacket.hxx
 
 FORMS    += mainwindow.ui

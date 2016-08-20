@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
-#include <QRegExp>
+#include "gdbpacket.hxx"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -38,17 +38,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::extractGdbPacket()
 {
-QRegExp	rx("\\$(.+)#..");
-QByteArray unzeroed_gdb_data = gdb_incoming_stream_data;
-int x;
-	/* literal zero bytes in byte arrays do not work with qt regular expressions,
-	 * so do this replacement hack as a workaround */
-	unzeroed_gdb_data.replace(0, QString("s"));
-	if ((x = rx.indexIn(unzeroed_gdb_data)) != -1)
+QPair<QByteArray, QByteArray> x = GdbPacket::extract_packet(gdb_incoming_bytestream_data);
+
+	if (x.first.length())
 	{
-		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: "
-			+ gdb_incoming_stream_data.mid(x, rx.cap(1).length())));
-		gdb_incoming_stream_data = gdb_incoming_stream_data.right(gdb_incoming_stream_data.length() - x - rx.matchedLength());
+		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: ")
+				+ x.first);
+		gdb_incoming_bytestream_data = x.second;
 	}
 }
 
@@ -63,7 +59,7 @@ void MainWindow::gdbsocketReadyRead()
 QByteArray ba;
 	ui->plainTextEditGdbLog->appendPlainText(ba = gdbserver_socket->readAll());
 	bm_gdb_port.write(ba);
-	gdb_incoming_stream_data += ba;
+	gdb_incoming_bytestream_data += ba;
 	extractGdbPacket();
 }
 
