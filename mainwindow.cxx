@@ -39,10 +39,15 @@ MainWindow::~MainWindow()
 void MainWindow::extractGdbPacket()
 {
 QRegExp	rx("\\$(.+)#..");
+QByteArray unzeroed_gdb_data = gdb_incoming_stream_data;
 int x;
-	if ((x = rx.indexIn(gdb_incoming_stream_data)) != -1)
+	/* literal zero bytes in byte arrays do not work with qt regular expressions,
+	 * so do this replacement hack as a workaround */
+	unzeroed_gdb_data.replace(0, QString("s"));
+	if ((x = rx.indexIn(unzeroed_gdb_data)) != -1)
 	{
-		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: " + rx.cap(1)));
+		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: "
+			+ gdb_incoming_stream_data.mid(x, rx.cap(1).length())));
 		gdb_incoming_stream_data = gdb_incoming_stream_data.right(gdb_incoming_stream_data.length() - x - rx.matchedLength());
 	}
 }
