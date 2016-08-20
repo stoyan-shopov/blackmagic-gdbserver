@@ -44,17 +44,20 @@ void MainWindow::newGdbServerConnection()
 void MainWindow::gdbsocketReadyRead()
 {
 QByteArray ba;
-	ui->plainTextEditGdbserverLog->appendPlainText(ba = gdbserver_socket->readAll());
+	ui->plainTextEditGdbLog->appendPlainText(ba = gdbserver_socket->readAll());
 	bm_gdb_port.write(ba);
 }
 
 void MainWindow::bmGdbPortReadyRead()
 {
+QByteArray ba;
+	ba = bm_gdb_port.readAll();
 	if (gdbserver_socket)
-		gdbserver_socket->write(bm_gdb_port.readAll());
+		gdbserver_socket->write(ba);
+	ui->plainTextEditBmGdbLog->appendPlainText(ba);
 }
 
 void MainWindow::bmDebugPortReadyRead()
 {
-	ui->plainTextEditBmDebug->appendPlainText(bm_debug_port.readAll());
+	ui->plainTextEditBmDebugLog->appendPlainText(bm_debug_port.readAll());
 }
