@@ -45,7 +45,11 @@ QPair<QByteArray, QByteArray> x = GdbPacket::extract_packet(gdb_incoming_bytestr
 		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: ")
 				+ x.first);
 		gdb_incoming_bytestream_data = x.second;
+		
+		ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet(x.first));
+		ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet(x.first.append(0x80)));
 	}
+	ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet("."));
 }
 
 void MainWindow::newGdbServerConnection()
