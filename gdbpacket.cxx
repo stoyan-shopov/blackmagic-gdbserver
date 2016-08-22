@@ -11,6 +11,7 @@ QByteArray unzeroed_gdb_data = gdb_bytestream_data;
 int x;
 	/* literal zero bytes in byte arrays do not work with qt regular expressions,
 	 * so do this replacement hack as a workaround */
+	rx.setMinimal(true);
 	unzeroed_gdb_data.replace(0, QString("s"));
 	res.first = QByteArray();
 	res.second = gdb_bytestream_data;
