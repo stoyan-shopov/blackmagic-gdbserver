@@ -43,9 +43,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::extractGdbPacket()
 {
-QPair<QByteArray, QByteArray> x = GdbPacket::extract_packet(gdb_incoming_bytestream_data);
+QPair<QByteArray, QByteArray> x;
 
-	if (x.first.length())
+	while ((x = GdbPacket::extract_packet(gdb_incoming_bytestream_data)).first.length())
 	{
 		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected gdb packet: ")
 				+ x.first);
@@ -55,6 +55,23 @@ QPair<QByteArray, QByteArray> x = GdbPacket::extract_packet(gdb_incoming_bytestr
 		ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet(x.first.append(0x80)));
 	}
 	ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet("."));
+}
+
+void MainWindow::extractBlackmagicResponsePacket()
+{
+QPair<QByteArray, QByteArray> x;
+
+	while ((x = GdbPacket::extract_packet(bm_incoming_bytestream_data)).first.length())
+	{
+		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected bm response packet: ")
+				+ x.first);
+		bm_incoming_bytestream_data = x.second;
+	}
+}
+
+void MainWindow::handleBlackmagicResponsePacket()
+{
+static int state;	
 }
 
 void MainWindow::newGdbServerConnection()
@@ -79,6 +96,8 @@ QByteArray ba;
 	if (gdbserver_socket)
 		gdbserver_socket->write(ba);
 	ui->plainTextEditBmGdbLog->appendPlainText(ba);
+	bm_incoming_bytestream_data += ba;
+	extractBlackmagicResponsePacket();
 }
 
 void MainWindow::bmDebugPortReadyRead()

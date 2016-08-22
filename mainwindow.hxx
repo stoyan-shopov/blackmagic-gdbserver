@@ -24,6 +24,8 @@ public:
 	~MainWindow();
 private:
 	void extractGdbPacket(void);
+	void extractBlackmagicResponsePacket(void);
+	void handleBlackmagicResponsePacket(void);
 
 private slots:
 	void newGdbServerConnection(void);
@@ -42,6 +44,7 @@ private:
 	QSerialPort	bm_debug_port;
 	
 	QByteArray	gdb_incoming_bytestream_data;
+	QByteArray	bm_incoming_bytestream_data;
 };
 
 #endif // MAINWINDOW_HXX
