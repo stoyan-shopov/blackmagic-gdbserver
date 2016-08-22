@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	blackmagic_state = IDLE;
 	if (!gdbserver.listen(QHostAddress::Any, GDB_SERVER_PORT))
 	{
 		QMessageBox::critical(0, "error", "cannot open gdb server port");
@@ -65,13 +66,50 @@ QPair<QByteArray, QByteArray> x;
 	{
 		ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected bm response packet: ")
 				+ x.first);
+		handleBlackmagicResponsePacket(x.first);
 		bm_incoming_bytestream_data = x.second;
 	}
 }
 
-void MainWindow::handleBlackmagicResponsePacket()
+void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 {
-static int state;	
+
+	switch (blackmagic_state)
+	{
+		default:
+		case IDLE:
+			break;
+		case WAITING_SWDP_SCAN_RESPONSE:
+		{
+			static bool waiting_target_list = false;
+			if (packet.startsWith("OK"))
+			{
+				/* last packet */
+				waiting_target_list = false;
+				blackmagic_state = IDLE;
+			}
+			else switch (packet[0])
+			{
+				case 'O': /* monitor output packet */
+					
+					packet = QByteArray::fromHex(packet.mid(1));
+					ui->plainTextEditInternalDebugLog->appendPlainText(QString("monitor: ") + packet);
+					packet.replace("\n", "");
+					if (waiting_target_list)
+					{
+						if (packet.startsWith("No usable targets found"))
+							ui->comboBoxDetecteTargets->clear();
+						else
+							ui->comboBoxDetecteTargets->addItem(packet);
+					}
+					if (packet.startsWith("No. Att Driver"))
+						waiting_target_list = true;
+					break;
+			}
+			bm_gdb_port.write("+");
+			break;
+		}
+	}
 }
 
 void MainWindow::newGdbServerConnection()
@@ -93,7 +131,7 @@ void MainWindow::bmGdbPortReadyRead()
 {
 QByteArray ba;
 	ba = bm_gdb_port.readAll();
-	if (gdbserver_socket)
+	if (gdbserver_socket && blackmagic_state == IDLE)
 		gdbserver_socket->write(ba);
 	ui->plainTextEditBmGdbLog->appendPlainText(ba);
 	bm_incoming_bytestream_data += ba;
@@ -108,4 +146,10 @@ void MainWindow::bmDebugPortReadyRead()
 void MainWindow::on_pushButton_2_clicked()
 {
 	bm_gdb_port.write(GdbPacket::make_complete_packet("."));
+}
+
+void MainWindow::on_pushButtonSWDPScan_clicked()
+{
+	blackmagic_state = WAITING_SWDP_SCAN_RESPONSE;
+	bm_gdb_port.write(GdbPacket::make_complete_packet(GdbPacket::format_monitor_packet("swdp_scan")));
 }

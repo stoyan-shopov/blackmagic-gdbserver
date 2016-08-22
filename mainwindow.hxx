@@ -25,7 +25,7 @@ public:
 private:
 	void extractGdbPacket(void);
 	void extractBlackmagicResponsePacket(void);
-	void handleBlackmagicResponsePacket(void);
+	void handleBlackmagicResponsePacket(QByteArray packet);
 
 private slots:
 	void newGdbServerConnection(void);
@@ -34,6 +34,8 @@ private slots:
 	void bmDebugPortReadyRead(void);
 
 	void on_pushButton_2_clicked();
+	
+	void on_pushButtonSWDPScan_clicked();
 	
 private:
 	Ui::MainWindow *ui;
@@ -45,6 +47,13 @@ private:
 	
 	QByteArray	gdb_incoming_bytestream_data;
 	QByteArray	bm_incoming_bytestream_data;
+	enum
+	{
+		IDLE	= 0,
+		WAITING_SWDP_SCAN_RESPONSE,
+	}
+	blackmagic_state;
+	
 };
 
 #endif // MAINWINDOW_HXX

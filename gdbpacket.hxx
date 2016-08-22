@@ -13,6 +13,8 @@ public:
 	/* creates a valid gdb packet by prepending a start marker and appending an end
 	 * marker and a checksum to an arbitrary gdb packet data array */
 	static QByteArray make_complete_packet(const QByteArray & packet_data);
+	static QByteArray format_monitor_packet(const QByteArray & monitor_data)
+		{ return QByteArray("qRcmd,") + monitor_data.toHex(); }
 };
 
 #endif // GDBPACKET_HXX
