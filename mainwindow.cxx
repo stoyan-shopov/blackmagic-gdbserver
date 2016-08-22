@@ -9,11 +9,16 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	gdbserver.listen(QHostAddress::Any, 2331);
+	if (!gdbserver.listen(QHostAddress::Any, GDB_SERVER_PORT))
+	{
+		QMessageBox::critical(0, "error", "cannot open gdb server port");
+		exit(1);
+	}
+	
 	connect(& gdbserver, SIGNAL(newConnection()), this, SLOT(newGdbServerConnection()));
 	gdbserver_socket = 0;
-	bm_gdb_port.setPortName("com6");
-	bm_debug_port.setPortName("com7");
+	bm_gdb_port.setPortName(QString("com%1").arg(ui->spinBoxGdbSerialPort->value()));
+	bm_debug_port.setPortName(QString("com%1").arg(ui->spinBoxDebugSerialPort->value()));
 	
 	if (!bm_gdb_port.open(QIODevice::ReadWrite))
 		QMessageBox::critical(0, "error", "could not open blackmagic gdb port");
@@ -79,4 +84,9 @@ QByteArray ba;
 void MainWindow::bmDebugPortReadyRead()
 {
 	ui->plainTextEditBmDebugLog->appendPlainText(bm_debug_port.readAll());
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+	bm_gdb_port.write(GdbPacket::make_complete_packet("."));
 }

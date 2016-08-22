@@ -6,6 +6,11 @@
 #include <QTcpSocket>
 #include <QtSerialPort/QSerialPort>
 
+enum
+{
+	GDB_SERVER_PORT		= 2331,
+};
+
 namespace Ui {
 class MainWindow;
 }
@@ -26,6 +31,8 @@ private slots:
 	void bmGdbPortReadyRead(void);
 	void bmDebugPortReadyRead(void);
 
+	void on_pushButton_2_clicked();
+	
 private:
 	Ui::MainWindow *ui;
 	QTcpServer	gdbserver;
