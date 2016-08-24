@@ -2,12 +2,17 @@
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
+#include <QSettings>
 #include "gdbpacket.hxx"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow)
 {
+	QCoreApplication::setOrganizationName("shopov instruments");
+	QCoreApplication::setOrganizationDomain("mysoft.com");
+	QCoreApplication::setApplicationName("blackmagic gdbserver");
+	QSettings s("bm-gdbserver.rc", QSettings::IniFormat);
 	ui->setupUi(this);
 	blackmagic_state = IDLE;
 	if (!gdbserver.listen(QHostAddress::Any, GDB_SERVER_PORT))
@@ -15,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::critical(0, "error", "cannot open gdb server port");
 		exit(1);
 	}
+	ui->spinBoxGdbSerialPort->setValue(s.value("bm-gdb-serial-port-number", 1).toInt());
+	ui->spinBoxDebugSerialPort->setValue(s.value("bm-debug-serial-port-number", 2).toInt());
 	
 	connect(& gdbserver, SIGNAL(newConnection()), this, SLOT(newGdbServerConnection()));
 	gdbserver_socket = 0;
@@ -41,6 +48,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+	QSettings s("bm-gdbserver.rc", QSettings::IniFormat);
+	s.setValue("bm-gdb-serial-port-number", ui->spinBoxGdbSerialPort->value());
+	s.setValue("bm-debug-serial-port-number", ui->spinBoxDebugSerialPort->value());
+	QMainWindow::closeEvent(e);
 }
 
 void MainWindow::extractGdbPacket()
