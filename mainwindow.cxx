@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	else
 	{
 		QMessageBox::information(0, "success", "blackmagic gdb port opened successfully");
+		bm_gdb_port.setDataTerminalReady(true);
 		connect(& bm_gdb_port, SIGNAL(readyRead()), this, SLOT(bmGdbPortReadyRead()));
 	}
 	if (!bm_debug_port.open(QIODevice::ReadOnly))
