@@ -35,6 +35,8 @@ private slots:
 	void bmGdbPortReadyRead(void);
 	void bmDebugPortReadyRead(void);
 	
+	void blackmagicError(void);
+	
 	void handleLogVisibility(void);
 
 	void on_pushButton_2_clicked();
@@ -57,6 +59,7 @@ private:
 	enum
 	{
 		IDLE	= 0,
+		WAITING_FOR_PROBE_CONNECT,
 		WAITING_SWDP_SCAN_RESPONSE,
 		WAITING_SWDP_ATTACH_RESPONSE,
 		WAITING_SWDP_RESET_RESPONSE,

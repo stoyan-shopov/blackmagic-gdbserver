@@ -34,9 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::critical(0, "error", "could not open blackmagic gdb port");
 	else
 	{
+		blackmagic_state = WAITING_FOR_PROBE_CONNECT;
+		connect(& bm_gdb_port, SIGNAL(readyRead()), this, SLOT(bmGdbPortReadyRead()));
 		QMessageBox::information(0, "success", "blackmagic gdb port opened successfully");
 		bm_gdb_port.setDataTerminalReady(true);
-		connect(& bm_gdb_port, SIGNAL(readyRead()), this, SLOT(bmGdbPortReadyRead()));
 	}
 	if (!bm_debug_port.open(QIODevice::ReadOnly))
 		QMessageBox::critical(0, "error", "could not open blackmagic debug port");
@@ -103,6 +104,12 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 		case IDLE:
 			if (!is_gdb_connected)
 				bm_gdb_port.write("+");
+			break;
+		case WAITING_FOR_PROBE_CONNECT:
+			bm_gdb_port.write("+");
+			if (packet.startsWith("OK"))
+				/* probe connected */
+				ui->groupBoxTargetControl->setEnabled(true);
 			break;
 		case WAITING_SWDP_SCAN_RESPONSE:
 		{
@@ -189,6 +196,10 @@ QByteArray ba;
 void MainWindow::bmDebugPortReadyRead()
 {
 	ui->plainTextEditBmDebugLog->appendPlainText(bm_debug_port.readAll());
+}
+
+void MainWindow::blackmagicError()
+{
 }
 
 void MainWindow::handleLogVisibility()
