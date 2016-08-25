@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>715</width>
-    <height>503</height>
+    <width>799</width>
+    <height>602</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
 }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -79,7 +79,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>gdb request packets</string>
+         <string>gdb server log</string>
         </property>
        </widget>
       </item>
@@ -100,52 +100,51 @@
      </layout>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEditGdbLog">
-      <property name="plainText">
-       <string/>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <property name="textInteractionFlags">
-       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-      </property>
+      <widget class="QPlainTextEdit" name="plainTextEditGdbLog">
+       <property name="plainText">
+        <string/>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>blackmagic debug log</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="plainTextEditBmDebugLog">
+          <property name="textInteractionFlags">
+           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>internal debug log</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="plainTextEditInternalDebugLog"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>blackmagic gdb response packets</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="plainTextEditBmGdbLog">
-      <property name="textInteractionFlags">
-       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>blackmagic debug log</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="plainTextEditBmDebugLog">
-      <property name="textInteractionFlags">
-       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>internal debug log</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="plainTextEditInternalDebugLog"/>
     </item>
    </layout>
   </widget>
@@ -154,7 +153,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>715</width>
+     <width>799</width>
      <height>20</height>
     </rect>
    </property>
@@ -179,28 +178,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>505</x>
-     <y>54</y>
+     <x>704</x>
+     <y>127</y>
     </hint>
     <hint type="destinationlabel">
-     <x>504</x>
-     <y>105</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>plainTextEditBmGdbLog</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>583</x>
-     <y>54</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>556</x>
-     <y>208</y>
+     <x>513</x>
+     <y>204</y>
     </hint>
    </hints>
   </connection>
@@ -211,12 +194,28 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>607</x>
-     <y>54</y>
+     <x>704</x>
+     <y>127</y>
     </hint>
     <hint type="destinationlabel">
-     <x>600</x>
-     <y>307</y>
+     <x>609</x>
+     <y>394</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>plainTextEditInternalDebugLog</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>645</x>
+     <y>123</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>659</x>
+     <y>420</y>
     </hint>
    </hints>
   </connection>
