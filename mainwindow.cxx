@@ -71,6 +71,8 @@ QPair<QByteArray, QByteArray> x;
 				+ x.first);
 		gdb_incoming_bytestream_data = x.second;
 		
+		ui->plainTextEditGdbLog->appendPlainText(QString("\t") + GdbPacket::decode_request_packet(x.first));
+		
 		ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet(x.first));
 		ui->plainTextEditInternalDebugLog->appendPlainText(GdbPacket::make_complete_packet(x.first.append(0x80)));
 	}
@@ -128,6 +130,17 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 			bm_gdb_port.write("+");
 			break;
 		}
+		case WAITING_SWDP_ATTACH_RESPONSE:
+		{
+			bm_gdb_port.write("+");
+			bm_gdb_port.flush();
+			if (packet.startsWith("T"))
+				QMessageBox::information(0, "success", "target attached");
+			else
+				QMessageBox::critical(0, "error", "cannot attach to target");
+			blackmagic_state = IDLE;
+			break;
+		}
 	}
 }
 
@@ -171,4 +184,10 @@ void MainWindow::on_pushButtonSWDPScan_clicked()
 {
 	blackmagic_state = WAITING_SWDP_SCAN_RESPONSE;
 	bm_gdb_port.write(GdbPacket::make_complete_packet(GdbPacket::format_monitor_packet("swdp_scan")));
+}
+
+void MainWindow::on_pushButtonAttach_clicked()
+{
+	blackmagic_state = WAITING_SWDP_ATTACH_RESPONSE;
+	bm_gdb_port.write(GdbPacket::make_complete_packet("vAttach;1"));
 }
