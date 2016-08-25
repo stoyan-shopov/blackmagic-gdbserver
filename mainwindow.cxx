@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QSettings s("bm-gdbserver.rc", QSettings::IniFormat);
 	ui->setupUi(this);
 	blackmagic_state = IDLE;
+	is_gdb_connected = false;
 	if (!gdbserver.listen(QHostAddress::Any, GDB_SERVER_PORT))
 	{
 		QMessageBox::critical(0, "error", "cannot open gdb server port");
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::information(0, "success", "blackmagic debug port opened successfully");
 		connect(& bm_debug_port, SIGNAL(readyRead()), this, SLOT(bmDebugPortReadyRead()));
 	}
+	connect(ui->checkBoxShowLogs, SIGNAL(clicked(bool)), this, SLOT(handleLogVisibility()));
 }
 
 MainWindow::~MainWindow()
@@ -99,6 +101,8 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 	{
 		default:
 		case IDLE:
+			if (!is_gdb_connected)
+				bm_gdb_port.write("+");
 			break;
 		case WAITING_SWDP_SCAN_RESPONSE:
 		{
@@ -158,6 +162,7 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 void MainWindow::newGdbServerConnection()
 {
 	gdbserver_socket = gdbserver.nextPendingConnection();
+	is_gdb_connected = true;
 	connect(gdbserver_socket, SIGNAL(readyRead()), this, SLOT(gdbsocketReadyRead()));
 }
 
@@ -184,6 +189,20 @@ QByteArray ba;
 void MainWindow::bmDebugPortReadyRead()
 {
 	ui->plainTextEditBmDebugLog->appendPlainText(bm_debug_port.readAll());
+}
+
+void MainWindow::handleLogVisibility()
+{
+	if (ui->checkBoxShowLogs->isChecked())
+	{
+		ui->groupBoxLogs->show();
+	}
+	else
+	{
+		ui->groupBoxLogs->hide();
+	}
+	this->updateGeometry();
+	this->resize(minimumSize());
 }
 
 void MainWindow::on_pushButton_2_clicked()

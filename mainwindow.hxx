@@ -34,6 +34,8 @@ private slots:
 	void gdbsocketReadyRead(void);
 	void bmGdbPortReadyRead(void);
 	void bmDebugPortReadyRead(void);
+	
+	void handleLogVisibility(void);
 
 	void on_pushButton_2_clicked();
 	
@@ -51,6 +53,7 @@ private:
 	
 	QByteArray	gdb_incoming_bytestream_data;
 	QByteArray	bm_incoming_bytestream_data;
+	bool		is_gdb_connected;
 	enum
 	{
 		IDLE	= 0,
