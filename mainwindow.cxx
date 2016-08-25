@@ -183,6 +183,7 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pushButtonSWDPScan_clicked()
 {
 	blackmagic_state = WAITING_SWDP_SCAN_RESPONSE;
+	ui->comboBoxDetecteTargets->clear();
 	bm_gdb_port.write(GdbPacket::make_complete_packet(GdbPacket::format_monitor_packet("swdp_scan")));
 }
 
