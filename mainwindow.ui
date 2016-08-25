@@ -34,6 +34,13 @@
        <widget class="QComboBox" name="comboBoxDetecteTargets"/>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonReset">
+        <property name="text">
+         <string>reset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonAttach">
         <property name="text">
          <string>attach</string>

@@ -141,6 +141,17 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 			blackmagic_state = IDLE;
 			break;
 		}
+		case WAITING_SWDP_RESET_RESPONSE:
+		{
+			bm_gdb_port.write("+");
+			bm_gdb_port.flush();
+			if (packet.startsWith("T"))
+				QMessageBox::information(0, "success", "target reset");
+			else
+				QMessageBox::critical(0, "error", "cannot reset target");
+			blackmagic_state = IDLE;
+			break;
+		}
 	}
 }
 
@@ -191,4 +202,10 @@ void MainWindow::on_pushButtonAttach_clicked()
 {
 	blackmagic_state = WAITING_SWDP_ATTACH_RESPONSE;
 	bm_gdb_port.write(GdbPacket::make_complete_packet("vAttach;1"));
+}
+
+void MainWindow::on_pushButtonReset_clicked()
+{
+	blackmagic_state = WAITING_SWDP_RESET_RESPONSE;
+	bm_gdb_port.write(GdbPacket::make_complete_packet("vRun;"));
 }

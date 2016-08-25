@@ -39,7 +39,8 @@ private slots:
 	
 	void on_pushButtonSWDPScan_clicked();
 	void on_pushButtonAttach_clicked();
-	
+	void on_pushButtonReset_clicked();
+
 private:
 	Ui::MainWindow *ui;
 	QTcpServer	gdbserver;
@@ -55,6 +56,7 @@ private:
 		IDLE	= 0,
 		WAITING_SWDP_SCAN_RESPONSE,
 		WAITING_SWDP_ATTACH_RESPONSE,
+		WAITING_SWDP_RESET_RESPONSE,
 	}
 	blackmagic_state;
 	
