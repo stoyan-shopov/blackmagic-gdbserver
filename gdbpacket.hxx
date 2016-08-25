@@ -15,6 +15,7 @@ public:
 	static QByteArray make_complete_packet(const QByteArray & packet_data);
 	static QByteArray format_monitor_packet(const QByteArray & monitor_data)
 		{ return QByteArray("qRcmd,") + monitor_data.toHex(); }
+	static QString decode_request_packet(const QByteArray & packet_data);
 };
 
 #endif // GDBPACKET_HXX

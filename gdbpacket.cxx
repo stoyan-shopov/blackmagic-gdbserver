@@ -34,3 +34,25 @@ QByteArray res("$");
 	res += QString("%1").arg(cksum, 2, 16, QChar('0'));
 	return res;
 }
+
+QString GdbPacket::decode_request_packet(const QByteArray & packet_data)
+{
+QString res("<<< unknown request packet >>>");
+unsigned i;
+static const char * packets[][2] =
+{
+	{ "H", "select thread", },
+	{ "qSupported", "query supported features", },
+	{ "qXfer:features:read:target.xml:", "access target description", },
+	{ "?", "query target halt reason", },
+	{ "qTStatus", "query trace experiment in progress", },
+};
+
+	for (i = 0; i < sizeof packets / sizeof * packets; i ++)
+		if (packet_data.startsWith(* packets[i]))
+		{
+			res = packets[i][1];
+			break;
+		}
+	return res;
+}
