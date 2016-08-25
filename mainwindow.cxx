@@ -140,7 +140,7 @@ void MainWindow::newGdbServerConnection()
 void MainWindow::gdbsocketReadyRead()
 {
 QByteArray ba;
-	ui->plainTextEditGdbLog->appendPlainText(ba = gdbserver_socket->readAll());
+	ui->plainTextEditGdbLog->appendPlainText(QString("gdb> ") + (ba = gdbserver_socket->readAll()));
 	bm_gdb_port.write(ba);
 	gdb_incoming_bytestream_data += ba;
 	extractGdbPacket();
@@ -152,7 +152,7 @@ QByteArray ba;
 	ba = bm_gdb_port.readAll();
 	if (gdbserver_socket && blackmagic_state == IDLE)
 		gdbserver_socket->write(ba);
-	ui->plainTextEditGdbLog->appendPlainText(ba);
+	ui->plainTextEditGdbLog->appendPlainText(QString("bm > ") + ba);
 	bm_incoming_bytestream_data += ba;
 	extractBlackmagicResponsePacket();
 }
