@@ -3,6 +3,7 @@
 
 #include <QMessageBox>
 #include <QSettings>
+#include <QDebug>
 #include "gdbpacket.hxx"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::critical(0, "error", "could not open blackmagic gdb port");
 	else
 	{
+		connect(& bm_gdb_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(blackmagicError(QSerialPort::SerialPortError)));
 		blackmagic_state = WAITING_FOR_PROBE_CONNECT;
 		connect(& bm_gdb_port, SIGNAL(readyRead()), this, SLOT(bmGdbPortReadyRead()));
 		QMessageBox::information(0, "success", "blackmagic gdb port opened successfully");
@@ -43,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::critical(0, "error", "could not open blackmagic debug port");
 	else
 	{
+		connect(& bm_debug_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(blackmagicError(QSerialPort::SerialPortError)));
 		QMessageBox::information(0, "success", "blackmagic debug port opened successfully");
 		connect(& bm_debug_port, SIGNAL(readyRead()), this, SLOT(bmDebugPortReadyRead()));
 	}
@@ -198,8 +201,9 @@ void MainWindow::bmDebugPortReadyRead()
 	ui->plainTextEditBmDebugLog->appendPlainText(bm_debug_port.readAll());
 }
 
-void MainWindow::blackmagicError()
+void MainWindow::blackmagicError(QSerialPort::SerialPortError error)
 {
+	qDebug() << error;
 }
 
 void MainWindow::handleLogVisibility()

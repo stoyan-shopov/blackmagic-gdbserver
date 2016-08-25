@@ -35,7 +35,7 @@ private slots:
 	void bmGdbPortReadyRead(void);
 	void bmDebugPortReadyRead(void);
 	
-	void blackmagicError(void);
+	void blackmagicError(QSerialPort::SerialPortError error);
 	
 	void handleLogVisibility(void);
 
