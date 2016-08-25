@@ -111,8 +111,11 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 		case WAITING_FOR_PROBE_CONNECT:
 			bm_gdb_port.write("+");
 			if (packet.startsWith("OK"))
+			{
 				/* probe connected */
+				ui->groupBoxBlackmagicConnectionSettings->setEnabled(false);
 				ui->groupBoxTargetControl->setEnabled(true);
+			}
 			break;
 		case WAITING_SWDP_SCAN_RESPONSE:
 		{
