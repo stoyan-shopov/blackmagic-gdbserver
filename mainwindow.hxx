@@ -8,7 +8,7 @@
 
 enum
 {
-	GDB_SERVER_PORT		= 2331,
+	GDB_SERVER_PORT		= 5000,
 };
 
 namespace Ui {
