@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	connect(& gdbserver, SIGNAL(newConnection()), this, SLOT(newGdbServerConnection()));
 	gdbserver_socket = 0;
-	bm_gdb_port.setPortName(QString("com%1").arg(ui->spinBoxGdbSerialPort->value()));
-	bm_debug_port.setPortName(QString("com%1").arg(ui->spinBoxDebugSerialPort->value()));
+	bm_gdb_port.setPortName(QString("\\\\.\\com%1").arg(ui->spinBoxGdbSerialPort->value()));
+	bm_debug_port.setPortName(QString("\\\\.\\com%1").arg(ui->spinBoxDebugSerialPort->value()));
 	
 	if (!bm_gdb_port.open(QIODevice::ReadWrite))
 		QMessageBox::critical(0, "error", "could not open blackmagic gdb port");
