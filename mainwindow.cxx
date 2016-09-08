@@ -146,6 +146,7 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 			if (packet.at(0) == 'm')
 			{
 				QXmlStreamReader xml(packet.right(packet.length() - 1));
+				int i;
 				ram_areas.clear();
 				flash_areas.clear();
 				uint32_t address, length;
@@ -159,7 +160,6 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 					if (xml.isStartElement())
 					{
 						qDebug() << "attributes:";
-						int i;
 						a = xml.attributes();
 						for (i = 0; i < a.size(); i++)
 						{
@@ -192,16 +192,35 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 								if (a[i].name() == "name" && a[i].value() == "blocksize")
 								{
 									struct flash_area mem;
+									xml.readNext();
 									mem.start_address = address;
 									mem.length = length;
 									mem.block_size = xml.text().toUInt(0, 0);
 									flash_areas.push_back(mem);
+									break;
 								}
 							}
 						}
 					}
 				}
-				qDebug() << "found memory areas: " << ram_areas.length() << flash_areas.length();
+				ui->tableWidgetMemoryAreas->clear();
+				for (i = 0; i < ram_areas.length(); i ++)
+				{
+					ui->tableWidgetMemoryAreas->insertRow(ui->tableWidgetMemoryAreas->rowCount());
+					ui->tableWidgetMemoryAreas->setItem(i, 0, new QTableWidgetItem("ram"));
+					ui->tableWidgetMemoryAreas->setItem(i, 1, new QTableWidgetItem(QString("0x%1").arg(ram_areas[i].start_address, 0, 16)));
+					ui->tableWidgetMemoryAreas->setItem(i, 2, new QTableWidgetItem(QString("0x%1").arg(ram_areas[i].length, 0, 16)));
+					ui->tableWidgetMemoryAreas->setItem(i, 3, new QTableWidgetItem("n/a"));
+				}
+				for (i = 0; i < flash_areas.length(); i ++)
+				{
+					int n;
+					ui->tableWidgetMemoryAreas->insertRow(n = ui->tableWidgetMemoryAreas->rowCount());
+					ui->tableWidgetMemoryAreas->setItem(n, 0, new QTableWidgetItem("flash"));
+					ui->tableWidgetMemoryAreas->setItem(n, 1, new QTableWidgetItem(QString("0x%1").arg(flash_areas[i].start_address, 0, 16)));
+					ui->tableWidgetMemoryAreas->setItem(n, 2, new QTableWidgetItem(QString("0x%1").arg(flash_areas[i].length, 0, 16)));
+					ui->tableWidgetMemoryAreas->setItem(n, 3, new QTableWidgetItem(QString("0x%1").arg(flash_areas[i].block_size, 0, 16)));
+				}
 			}
 			blackmagic_state = IDLE;
 			break;

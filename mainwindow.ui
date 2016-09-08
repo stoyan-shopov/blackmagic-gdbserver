@@ -189,6 +189,30 @@
      </layout>
     </item>
     <item>
+     <widget class="QTableWidget" name="tableWidgetMemoryAreas">
+      <column>
+       <property name="text">
+        <string>memory type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>start address</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>length</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>block size</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
      <widget class="QGroupBox" name="groupBoxLogs">
       <property name="title">
        <string>debug logs</string>
