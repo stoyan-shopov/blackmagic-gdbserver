@@ -45,6 +45,10 @@ private slots:
 	void on_pushButtonAttach_clicked();
 	void on_pushButtonReset_clicked();
 
+	void on_pushButtonReadTest_clicked();
+	
+	void on_pushButtonWriteTest_clicked();
+	
 private:
 	Ui::MainWindow *ui;
 	QTcpServer	gdbserver;

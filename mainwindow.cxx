@@ -246,3 +246,14 @@ void MainWindow::on_pushButtonReset_clicked()
 	blackmagic_state = WAITING_SWDP_RESET_RESPONSE;
 	bm_gdb_port.write(GdbPacket::make_complete_packet("vRun;"));
 }
+
+void MainWindow::on_pushButtonReadTest_clicked()
+{
+	bm_gdb_port.write(GdbPacket::make_complete_packet("m0,400"));
+}
+
+void MainWindow::on_pushButtonWriteTest_clicked()
+{
+	
+	bm_gdb_port.write(GdbPacket::make_complete_packet(QByteArray("X20000000,400:") + QByteArray(0x400, ' ')));
+}

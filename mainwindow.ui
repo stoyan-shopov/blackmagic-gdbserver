@@ -156,6 +156,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonReadTest">
+        <property name="text">
+         <string>1k read test</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonWriteTest">
+        <property name="text">
+         <string>1k write test</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_2">
         <property name="text">
          <string>hack</string>
