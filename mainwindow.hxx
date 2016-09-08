@@ -27,6 +27,11 @@ public:
 	~MainWindow();
 protected:
 	void closeEvent(QCloseEvent * e);
+signals:
+	void probeConnected(void);
+	void targetScanSuccessfull(void);
+	void targetAttached(void);
+	
 private:
 	void extractGdbPacket(void);
 	void extractBlackmagicResponsePacket(void);

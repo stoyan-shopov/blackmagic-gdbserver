@@ -52,6 +52,12 @@ MainWindow::MainWindow(QWidget *parent) :
 		connect(& bm_debug_port, SIGNAL(readyRead()), this, SLOT(bmDebugPortReadyRead()));
 	}
 	connect(ui->checkBoxShowLogs, SIGNAL(clicked(bool)), this, SLOT(handleLogVisibility()));
+	
+	connect(this, SIGNAL(probeConnected()), this, SLOT(on_pushButtonSWDPScan_clicked()));
+	connect(this, SIGNAL(targetScanSuccessfull()), this, SLOT(on_pushButtonAttach_clicked()));
+	connect(this, SIGNAL(targetAttached()), this, SLOT(on_pushButton_2_clicked()));
+	
+	
 QString target_xml(
 "<?xml version=\"1.0\"?><!DOCTYPE target SYSTEM \"gdb-target.dtd\"><target>  <architecture>arm</architecture>  <feature name=\"org.gnu.gdb.arm.m-profile\">    <reg name=\"r0\" bitsize=\"32\"/>    <reg name=\"r1\" bitsize=\"32\"/>    <reg name=\"r2\" bitsize=\"32\"/>    <reg name=\"r3\" bitsize=\"32\"/>    <reg name=\"r4\" bitsize=\"32\"/>    <reg name=\"r5\" bitsize=\"32\"/>    <reg name=\"r6\" bitsize=\"32\"/>    <reg name=\"r7\" bitsize=\"32\"/>    <reg name=\"r8\" bitsize=\"32\"/>    <reg name=\"r9\" bitsize=\"32\"/>    <reg name=\"r10\" bitsize=\"32\n"
 "bm > \"/>    <reg name=\"r11\" bitsize=\"32\"/>    <reg name=\"r12\" bitsize=\"32\"/>    <reg name=\"sp\" bitsize=\"32\" type=\"data_ptr\"/>    <reg name=\"lr\" bitsize=\"32\" type=\"code_ptr\"/>    <reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>    <reg name=\"xpsr\" bitsize=\"32\"/>    <reg name=\"msp\" bitsize=\"32\" save-restore=\"no\" type=\"data_ptr\"/>    <reg name=\"psp\" bitsize=\"32\" save-restore=\"no\" type=\"data_ptr\"/>    <reg name=\"special\" bitsize=\"32\" save-restore=\"no\"/>  </feature></target>"
@@ -248,16 +254,19 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 				ui->groupBoxBlackmagicConnectionSettings->setEnabled(false);
 				ui->groupBoxTargetControl->setEnabled(true);
 				blackmagic_state = IDLE;
+				emit probeConnected();
 			}
 			break;
 		case WAITING_SWDP_SCAN_RESPONSE:
 		{
 			static bool waiting_target_list = false;
+			bm_gdb_port.write("+");
 			if (packet.startsWith("OK"))
 			{
 				/* last packet */
 				waiting_target_list = false;
 				blackmagic_state = IDLE;
+				emit targetScanSuccessfull();
 			}
 			else switch (packet[0])
 			{
@@ -277,18 +286,20 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 						waiting_target_list = true;
 					break;
 			}
-			bm_gdb_port.write("+");
 			break;
 		}
 		case WAITING_SWDP_ATTACH_RESPONSE:
 		{
 			bm_gdb_port.write("+");
 			bm_gdb_port.flush();
+			blackmagic_state = IDLE;
 			if (packet.startsWith("T"))
+			{
 				QMessageBox::information(0, "success", "target attached");
+				emit targetAttached();
+			}
 			else
 				QMessageBox::critical(0, "error", "cannot attach to target");
-			blackmagic_state = IDLE;
 			break;
 		}
 		case WAITING_SWDP_RESET_RESPONSE:
