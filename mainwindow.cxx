@@ -146,6 +146,10 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 			if (packet.at(0) == 'm')
 			{
 				QXmlStreamReader xml(packet.right(packet.length() - 1));
+				ram_areas.clear();
+				flash_areas.clear();
+				uint32_t address, length;
+				bool is_ram;
 
 				while (!xml.atEnd())
 				{
@@ -161,16 +165,43 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 						{
 							qDebug() << a[i].name() << a[i].value();
 						}
-						if (xml.name() == "reg")
+						if (xml.name() == "memory")
+						{
+							is_ram = false;
+							for (i = 0; i < a.size(); i++)
+							{
+								if (a[i].name() == "type")
+									is_ram = ((a[i].value() == "ram") ? true : false);
+								else if (a[i].name() == "start")
+									address = a[i].value().toUInt(0, 0);
+								else if (a[i].name() == "length")
+									length = a[i].value().toUInt(0, 0);
+							}
+							if (is_ram)
+							{
+								struct ram_area mem;
+								mem.start_address = address;
+								mem.length = length;
+								ram_areas.push_back(mem);
+							}
+						}
+						else if (xml.name() == "property")
 						{
 							for (i = 0; i < a.size(); i++)
 							{
-								if (a[i].name() == "name")
-									ui->comboBoxRegisters->addItem(a[i].value().toString());
+								if (a[i].name() == "name" && a[i].value() == "blocksize")
+								{
+									struct flash_area mem;
+									mem.start_address = address;
+									mem.length = length;
+									mem.block_size = xml.text().toUInt(0, 0);
+									flash_areas.push_back(mem);
+								}
 							}
 						}
 					}
 				}
+				qDebug() << "found memory areas: " << ram_areas.length() << flash_areas.length();
 			}
 			blackmagic_state = IDLE;
 			break;

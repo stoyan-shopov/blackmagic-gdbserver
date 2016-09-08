@@ -18,6 +18,9 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
+	
+	struct ram_area { uint32_t start_address, length; };
+	struct flash_area { uint32_t start_address, length, block_size; };
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
@@ -56,6 +59,9 @@ private:
 	/* blackmagic usb serial ports */
 	QSerialPort	bm_gdb_port;
 	QSerialPort	bm_debug_port;
+	
+	QVector<struct ram_area> ram_areas;
+	QVector<struct flash_area> flash_areas;
 	
 	int		packet_size;
 	
