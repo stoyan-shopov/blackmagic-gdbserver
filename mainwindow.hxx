@@ -57,6 +57,8 @@ private:
 	QSerialPort	bm_gdb_port;
 	QSerialPort	bm_debug_port;
 	
+	int		packet_size;
+	
 	QByteArray	gdb_incoming_bytestream_data;
 	QByteArray	bm_incoming_bytestream_data;
 	bool		is_gdb_connected;
@@ -64,8 +66,10 @@ private:
 	{
 		IDLE	= 0,
 		WAITING_FOR_PROBE_CONNECT,
+		WAITING_FOR_MEMORY_MAP,
 		WAITING_SWDP_SCAN_RESPONSE,
 		WAITING_SWDP_ATTACH_RESPONSE,
+		WAITING_FEATURES_RESPONSE,
 		WAITING_SWDP_RESET_RESPONSE,
 	}
 	blackmagic_state;

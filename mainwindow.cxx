@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QDebug>
+#include <QXmlStreamReader>
 #include "gdbpacket.hxx"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	blackmagic_state = IDLE;
 	is_gdb_connected = false;
+	packet_size = 0;
 	if (!gdbserver.listen(QHostAddress::Any, GDB_SERVER_PORT))
 	{
 		QMessageBox::critical(0, "error", "cannot open gdb server port");
@@ -50,6 +52,37 @@ MainWindow::MainWindow(QWidget *parent) :
 		connect(& bm_debug_port, SIGNAL(readyRead()), this, SLOT(bmDebugPortReadyRead()));
 	}
 	connect(ui->checkBoxShowLogs, SIGNAL(clicked(bool)), this, SLOT(handleLogVisibility()));
+QString target_xml(
+"<?xml version=\"1.0\"?><!DOCTYPE target SYSTEM \"gdb-target.dtd\"><target>  <architecture>arm</architecture>  <feature name=\"org.gnu.gdb.arm.m-profile\">    <reg name=\"r0\" bitsize=\"32\"/>    <reg name=\"r1\" bitsize=\"32\"/>    <reg name=\"r2\" bitsize=\"32\"/>    <reg name=\"r3\" bitsize=\"32\"/>    <reg name=\"r4\" bitsize=\"32\"/>    <reg name=\"r5\" bitsize=\"32\"/>    <reg name=\"r6\" bitsize=\"32\"/>    <reg name=\"r7\" bitsize=\"32\"/>    <reg name=\"r8\" bitsize=\"32\"/>    <reg name=\"r9\" bitsize=\"32\"/>    <reg name=\"r10\" bitsize=\"32\n"
+"bm > \"/>    <reg name=\"r11\" bitsize=\"32\"/>    <reg name=\"r12\" bitsize=\"32\"/>    <reg name=\"sp\" bitsize=\"32\" type=\"data_ptr\"/>    <reg name=\"lr\" bitsize=\"32\" type=\"code_ptr\"/>    <reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>    <reg name=\"xpsr\" bitsize=\"32\"/>    <reg name=\"msp\" bitsize=\"32\" save-restore=\"no\" type=\"data_ptr\"/>    <reg name=\"psp\" bitsize=\"32\" save-restore=\"no\" type=\"data_ptr\"/>    <reg name=\"special\" bitsize=\"32\" save-restore=\"no\"/>  </feature></target>"
+);
+"<memory-map><memory type=\"ram\" start=\"0x20000000\" length=\"0x5000\"/><memory type=\"flash\" start=\"0x08000000\" length=\"0x20000\"><property name=\"blocksize\">0x800</property></memory></memory-map>";
+QXmlStreamReader xml(target_xml);
+
+while (!xml.atEnd())
+{
+	QXmlStreamAttributes a;
+	xml.readNext();
+	qDebug() << xml.tokenType() << xml.tokenString() << xml.text() << xml.name();
+	if (xml.isStartElement())
+	{
+		qDebug() << "attributes:";
+		int i;
+		a = xml.attributes();
+		for (i = 0; i < a.size(); i++)
+		{
+			qDebug() << a[i].name() << a[i].value();
+		}
+		if (xml.name() == "reg")
+		{
+			for (i = 0; i < a.size(); i++)
+			{
+				if (a[i].name() == "name")
+					ui->comboBoxRegisters->addItem(a[i].value().toString());
+			}
+		}
+	}
+}
 }
 
 MainWindow::~MainWindow()
@@ -108,6 +141,55 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 			if (!is_gdb_connected)
 				bm_gdb_port.write("+");
 			break;
+		case WAITING_FOR_MEMORY_MAP:
+			bm_gdb_port.write("+");
+			if (packet.at(0) == 'm')
+			{
+				QXmlStreamReader xml(packet.right(packet.length() - 1));
+
+				while (!xml.atEnd())
+				{
+					QXmlStreamAttributes a;
+					xml.readNext();
+					qDebug() << xml.tokenType() << xml.tokenString() << xml.text() << xml.name();
+					if (xml.isStartElement())
+					{
+						qDebug() << "attributes:";
+						int i;
+						a = xml.attributes();
+						for (i = 0; i < a.size(); i++)
+						{
+							qDebug() << a[i].name() << a[i].value();
+						}
+						if (xml.name() == "reg")
+						{
+							for (i = 0; i < a.size(); i++)
+							{
+								if (a[i].name() == "name")
+									ui->comboBoxRegisters->addItem(a[i].value().toString());
+							}
+						}
+					}
+				}
+			}
+			blackmagic_state = IDLE;
+			break;
+		case WAITING_FEATURES_RESPONSE:
+			bm_gdb_port.write("+");
+			{
+				QRegExp	rx("PacketSize=(.+);");
+				rx.setMinimal(true);
+				if (rx.indexIn(packet) != -1)
+				{
+					packet_size = rx.cap(1).toInt(0, 16);
+					ui->plainTextEditInternalDebugLog->appendPlainText(QString("detected packet size: %1").arg(packet_size));
+					bm_gdb_port.write(GdbPacket::make_complete_packet(QString("qXfer:memory-map:read::0,%1")
+						  .arg(packet_size - /* reserve space for the start and end packet markers, the expected 'm' response packet type byte, and the two byte checksum */ - 5,0, 16).toLocal8Bit()));
+					blackmagic_state = WAITING_FOR_MEMORY_MAP;
+					break;
+				}
+			}
+			blackmagic_state = IDLE;
 		case WAITING_FOR_PROBE_CONNECT:
 			bm_gdb_port.write("+");
 			if (packet.startsWith("OK"))
@@ -115,6 +197,7 @@ void MainWindow::handleBlackmagicResponsePacket(QByteArray packet)
 				/* probe connected */
 				ui->groupBoxBlackmagicConnectionSettings->setEnabled(false);
 				ui->groupBoxTargetControl->setEnabled(true);
+				blackmagic_state = IDLE;
 			}
 			break;
 		case WAITING_SWDP_SCAN_RESPONSE:
@@ -225,7 +308,9 @@ void MainWindow::handleLogVisibility()
 
 void MainWindow::on_pushButton_2_clicked()
 {
-	bm_gdb_port.write(GdbPacket::make_complete_packet("."));
+	//bm_gdb_port.write(GdbPacket::make_complete_packet("."));
+	blackmagic_state = WAITING_FEATURES_RESPONSE;
+	bm_gdb_port.write(GdbPacket::make_complete_packet("qSupported"));
 }
 
 void MainWindow::on_pushButtonSWDPScan_clicked()

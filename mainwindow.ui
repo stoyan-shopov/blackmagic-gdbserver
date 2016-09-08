@@ -163,6 +163,9 @@
        </widget>
       </item>
       <item>
+       <widget class="QComboBox" name="comboBoxRegisters"/>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonWriteTest">
         <property name="text">
          <string>1k write test</string>
